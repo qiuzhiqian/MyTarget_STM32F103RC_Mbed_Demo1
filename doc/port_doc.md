@@ -12,9 +12,9 @@ cpu:**STM32F103RCT6**
 | *UART5_RX* | PD_2  | no remap |
 
 引用资源:  
-[mbed在线编译器][1]  
-[Mbed源码仓库][2]  
-[Stm32f1官方hal库][3]  
+[mbed在线编译器][mbed在线编译器]  
+[Mbed源码仓库][Mbed源码仓库]  
+[Stm32f1官方hal库][Stm32f1官方hal库]  
 
 ## 一、前言
 进入正篇前，需要介绍一些预备知识。
@@ -111,38 +111,38 @@ St的软件开发库有两套：标准库和hal库，通常早期的开发都是
 ## 二、构建源码工程
 ### 1获取NUCLEO_F103RB的模版
 既然是根据nucleo_F103RB来适配，当然需要有一个nucleo_F103RB的模版才行，当然没有也是可以的，我们可以手动通过MDK创建一个全新的工程。但是配置一些编译选项可能比较麻烦，所以我们还是通过nucleo_F103RB的模版来修改吧。
-打开[mbed的官网][1]，进入developer，然后点击编辑器compiler，当然如果没有帐号的先注册一个帐号吧。  
-![Aaron Swartz](./pic/pic1.png)  
+打开[mbed的官网][mbed在线编译器]，进入developer，然后点击编辑器compiler，当然如果没有帐号的先注册一个帐号吧。  
+![][1]  
 然后选择一个开发板，此处我们选择nucleo-f103RB
-![](./pic/pic2.png)  
+![][2]  
 确认选择后我们就可以新建工程了。  
-![](./pic/pic3.png)  
+![][3]  
 点击OK后工程建立完成，不过mbed的底层文件都被掩藏起来了，是看不到源码的。
 然后我们将工程导出，此处我们到处为mdk v5  
-![](./pic/pic4.png)  
-![](./pic/pic5.png)  
+![][4]  
+![][5]  
 至此，我们就拥有了一个nucleo-f103rb的模版，只不过打开这个工程的文件夹后我们可以看到mbed里面全都是.o文件，并不是我们希望的源码，因为我们要适配必须要源码才行，.o文件是没有办法修改的。
 ### 2建立nucleo-f103rb的源码工程
 我们知道，mbed os是开源项目，那么之前看到的.o文件都是通过这些源码编译后生成的，我们只要后去了mbed的源码，然后添加到工程中，然后稍作配置即可编译成功了。
 从mbed的github下载mbed的源码:
-[mbed源码][2]
+[mbed源码][Mbed源码仓库]
 下载成功后会看到这样的一些文件  
-![](./pic/pic6.png)  
+![][6]  
 将nucleo-f103rb工程目录中mbed里面的所有文件全部删除，然后将mbed源码中的文件全部拷贝，一些文档类的文件可以删除。
 当然为了是工程结构更加简洁，我们新建一个user和project文件夹，然后将project文件移入project中，将main和mbed_config.h文件移入user中。
 打开工程，将之前的文件输出掉，然后添加新的资源文件到工程中，注意观察原本的工程包含了那些文件夹，比如drivers、hal、platform等、对应着添加，原本没有添加的就不需要加进去了，比如原本event没有添加到工程中，那么我们添加源码时event就可以不用添加了。但是注意一定要添加完整，不然可能会出现编译错误的情况。  
-![](./pic/pic7.png)  
+![][7]  
 然后修改头文件包含路径，将存在头文件的路径全部添加即可。  
-![](./pic/pic8.png)  
+![][8]  
 设置sct文件，  
-![](./pic/pic9.png)  
+![][9]  
 将sct文件定位到mbed实际存在的路径上。
 在mbed\targets\TARGET_STM\TARGET_STM32F1\TARGET_NUCLEO_F103RB\device\TOOLCHAIN_ARM_STD中。然后就可以尝试着编译了，如果有问题照着问题的提示慢慢修改，直到没有error为止，如果文件添加完整，路径设置正确，sct设置正确应该就没有错误的。然后就是开始适配了。
 ## 三、适配开发板
 ### 1适配芯片
 首先将芯片修改为stm32f103RC  
-![](./pic/pic10.png)  
-然后从[st官网的hal库][3]中拷贝其他芯片的头文件和启动文件过来，
+![][10]  
+然后从[st官网的hal库][Stm32f1官方hal库]中拷贝其他芯片的头文件和启动文件过来，
 同时mbed工程中的sct文件只有stm32f103xb.sct，我们复制一分然后重命名为stm32f103xe.sct。
 修改stm32f1xx.h文件，注释掉#define STM32F103xB，取消注释#define STM32F103xE。
 
@@ -165,7 +165,7 @@ St的软件开发库有两套：标准库和hal库，通常早期的开发都是
 	  /* #define STM32F107xC*/    /*!< STM32F107RB, STM32F107VB, STM32F107RC and STM32F107VC */  
 	#endif
 好了，芯片的匹配工作完成，注意由于原本工程中的启动文件是用的startup_stm32f103xb.S，需要修改成startup_stm32f103xe.S  
-![](./pic/pic11.png)  
+![][11]  
 同时sct文件路径也要指定为stm32f103xe.sct
 
 ### 2适配晶振频率(如果不需要修改的可以跳过该步骤)
@@ -377,9 +377,9 @@ mbed对堆栈的定义做了自己的定义这个跟st自带的堆栈分配并�
 ### 4适配启动文件
 因为需要重新定义堆栈，所以堆栈地址需要修改，同时默认的开发板使用的是stm32f103RB，而我用的是stm32f103RC，支持的中断和外设比RB要多，所以需要加上去，此处可以使用st官方的hal库中的RC启动文件，然后修改堆栈地址。
 删除掉自带的堆栈设置，添加mbed需要的堆栈地址  
-![](./pic/pic12.png)  
+![][12]  
 然后删除掉自带文件的堆栈初始化操作  
-![](./pic/pic13.png)  
+![][13]  
 ### 5适配pinname，peripheralname和peripheralpin
 关于这三个东西，如果我们仔细研究一下他们的源码后，我们就会发现一个很有意思的东西
 PeripheralPins
@@ -420,7 +420,7 @@ peripheral的注册名就是peripheralnames
 		{NC,    NC,     0}
 	};
 peripheralpin就是跟上层打交道的。打交道的api集中在pinmap中  
-![](./pic/pic14.png)  
+![][14]  
 现在开始适配这三项
 比如我的外设是这样的
 LED1-------------------PC_0
@@ -652,20 +652,20 @@ serial_free函数中：
 发现没什么要修改的。
 
 修改完这些之后，编译应该就没有问题了，下载到开发板中也能工作正常了。  
-![](./pic/pic15.png)  
+![][15]  
 ### 7关于编译选项的研究
 为什么要研究编译选项？细心的同学可能会注意到我前面创建工程的一个细节，我的工程并不是自己使用MDK手动创建的，而是通过在线的编译器导出的。然后我有将工程中的所有文件全部更换成了mbed源码库中的文件和st hal官方库中的文件。既然文件我全部都替换了，那么我为什么不自己用MDK手动建立一个新工程呢？原因就在于编译选项上。手动新建的工程使用了一些默认的编译选项，而我们导出的mbed工程使用了一些自定义的编译选项，这些选项太多了，设置起来比较麻烦，所以我为了方便，就直接引用了导入的工程。
 那么现在你是否能够想到另外的一些想法：我用MDK手动新建一个工程，然后参照这mbed导出工程的编译选项来调整这个工程，那么这样的工程是否可用呢？答案是完全没问题。所以，现在我们得到了两种创建工程的方法。
 第一种：使用mbed在线编译器导出工程，然后替换所有的mbed文件。
 第二种：使用MDK手动创建工程，然后添加mbed库文件，然后照着之前导出的mbed编译选项设置。
 所以，现在我们就需要来研究一下mbed的编译选项，因为这不仅关系到工程创建，同样关系到工程移植。  
-![](./pic/pic16.png)  
+![][16]  
 为了更方便研究，我们直接将其复制到文本编辑器中:
 
 	-DDEVICE_RTC=1 -DDEVICE_SLEEP=1 -DTOOLCHAIN_object -DTOOLCHAIN_ARM_STD -D__ASSERT_MSG -DTARGET_STM32F1 --no_rtti -DTARGET_STM32F103RB -DMBED_BUILD_TIMESTAMP=1484039781.98 -Otime -DDEVICE_PORTINOUT=1 -D__CORTEX_M3 -DTARGET_FF_ARDUINO -c -O3 -DDEVICE_CAN=1 -DDEVICE_PORTOUT=1 -DDEVICE_STDIO_MESSAGES=1 -DTARGET_RELEASE --split_sections -DARM_MATH_CM3 -DTARGET_LIKE_CORTEX_M3 -DDEVICE_ANALOGIN=1 -DTARGET_NUCLEO_F103RB -DDEVICE_PORTIN=1 -DTARGET_CORTEX_M --cpu=Cortex-M3 -DTARGET_FF_MORPHO -DDEVICE_I2C=1 --preinclude=mbed_config.h -DTARGET_STM -DTOOLCHAIN_ARM -DDEVICE_INTERRUPTIN=1 --no_depend_system_headers -DTARGET_UVISOR_UNSUPPORTED --md -DDEVICE_PWMOUT=1 -DDEVICE_SERIAL_ASYNCH=1 --gnu --apcs=interwork -DDEVICE_SPI=1 -D__MBED__=1 -DDEVICE_SPISLAVE=1 -DDEVICE_SERIAL=1 -DTARGET_M3 -DDEVICE_I2CSLAVE=1 -D__CMSIS_RTOS -D__MBED_CMSIS_RTOS_CM -DTARGET_LIKE_MBED
 
 -D开头的都是预编译宏定义，等效于define中的定义  
-![](./pic/pic17.png)  
+![][17]  
 这是所有的-D选项，我们可以将这些选项直接设置在Define选项栏中
 
 	-DDEVICE_RTC=1 
@@ -719,7 +719,7 @@ serial_free函数中：
 	--gnu 
 	--apcs=interwork 
 这几个选项我们来看看什么意思，编译选项的含义我们需要查阅arm的官方编译手册  
-![](./pic/pic18.png)  
+![][18]  
 -no_rtti
 
 	Controls support for the RTTI features dynamic_cast and typeid in C++.
@@ -738,13 +738,13 @@ serial_free函数中：
 	Default
 	If you do not specify -Otime, the compiler assumes -Ospace.
 这个选项相当于MDK自带的设置选项Optimize for Time  
-![](./pic/pic19.png)  
+![][19]  
 -c 
 这个好理解，就是只编译，不链接，默认选项就是带有这个选项的。
 
 -O3
 优化等级，相当于MDK自带的Optimization选项  
-![](./pic/pic20.png)  
+![][20]  
 --split_sections 
 太专业的咋也说不清，看手册
 --cpu=Cortex-M3
@@ -752,7 +752,7 @@ serial_free函数中：
 
 --preinclude=mbed_config.h 
 --preinclude选项用来自定头文件的路径，等效于MDK自带的include设置项  
-![](./pic/pic21.png)  
+![][21]  
 -no_depend_system_headers 
 --md 
 --gnu 
@@ -762,7 +762,7 @@ serial_free函数中：
 
 下面我们看看-D的一些选项，这些选项我们可以到源码中通过全局搜索看看在什么地方使用了这些选项，然后分析这些选项有什么用。
 我们搜索一下  
-![](./pic/pic22.png)  
+![][22]  
 注意此处look in选项和include sub-folders选项，因为我们mbed工程中的有些文件并没有包含到工程中，比如rtos文件夹下面的文件，还有一些头文件，所以直接指明搜索路径搜索的更全一些
 
 TARGET_STM32F103RB这个选项关系到代码移植，我们要移植成TARGET_STM32F103RC
@@ -815,6 +815,37 @@ TARGET_STM32F103RB这个选项关系到代码移植，我们要移植成TARGET_S
 	#endif
 好了至此移植彻底完成了。
 
-  [1]: https://developer.mbed.org/
-  [2]: https://github.com/ARMmbed/mbed-os
-  [3]:http://www.st.com/content/st_com/en/products/embedded-software/mcus-embedded-software/stm32-embedded-software/stm32cube-embedded-software/stm32cubef1.html
+  [mbed在线编译器]: https://developer.mbed.org/
+  [Mbed源码仓库]: https://github.com/ARMmbed/mbed-os
+  [Stm32f1官方hal库]:http://www.st.com/content/st_com/en/products/embedded-software/mcus-embedded-software/stm32-embedded-software/stm32cube-embedded-software/stm32cubef1.html
+  
+  [1]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic1.png
+  [2]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic2.png
+  [3]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic3.png
+  [4]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic4.png
+  [5]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic5.png
+  [6]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic6.png
+  [7]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic7.png
+  [8]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic8.png
+  [9]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic9.png
+  [10]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic10.png
+  [11]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic11.png
+  [12]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic12.png
+  [13]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic13.png
+  [14]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic14.png
+  [15]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic15.png
+  [16]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic16.png
+  [17]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic17.png
+  [18]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic18.png
+  [19]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic19.png
+  [20]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic20.png
+  [21]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic21.png
+  [22]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic22.png
+  [23]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic23.png
+  [24]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic24.png
+  [25]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic25.png
+  [26]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic26.png
+  [27]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic27.png
+  [28]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic28.png
+  [29]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic29.png
+  [30]: https://raw.githubusercontent.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/master/doc/pic/pic30.png
