@@ -12,3 +12,5 @@ cpu:*stm32f103RC*
 if you want a detail document(only chinese document),please mail me.
 email:xia_mengliang@163.com
 qq:1017621406
+
+[detail port document](https://github.com/qiuzhiqian/MyTarget_STM32F103RC_Mbed_Demo1/blob/master/doc/port_doc.md)
